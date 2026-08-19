@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Routine Settimanale (Protetta)</title>
+  <title>Routine Settimanale (Trading & Protetta)</title>
   <style>
     :root {
       --bg-dark: #0d1117;
@@ -264,7 +264,6 @@
       font-size: 12px;
     }
 
-    /* SELETTORE GIORNI MOBILE */
     .mobile-day-selector {
       display: none;
       gap: 6px;
@@ -440,7 +439,6 @@
     .type-free    { background: #162a45; border-color: var(--accent-blue); }
     .type-custom  { background: #281a3f; border-color: var(--accent-purple); }
 
-    /* REGOLE MOBILE */
     @media (max-width: 768px) {
       body {
         height: auto;
@@ -503,6 +501,7 @@
 </head>
 <body>
 
+  <!-- SCHERMATA LOGIN -->
   <div id="loginOverlay">
     <div class="login-box">
       <h2>🔒 Accesso Riservato</h2>
@@ -512,6 +511,7 @@
     </div>
   </div>
 
+  <!-- CONTENUTO DEL SITO -->
   <div id="appContent">
     <div class="sidebar">
       <button class="btn-reset" onclick="syncFromTodayOnwards()">🔄 Pulisci Passato e Ripristina</button>
@@ -522,8 +522,18 @@
           <span>Sveglia & Igiene</span>
           <span class="preset-badge" style="background:#22272e; color:#8b949e;">09:00</span>
         </div>
-        <div class="preset-item" onclick="quickAdd('Trading USA (2h)', '15:30', '17:30', 'trade')">
-          <span>Trading USA (2h)</span>
+        <div class="preset-item" onclick="quickAdd('Pranzo (30m/1h)', '13:00', '13:30', 'routine')">
+          <span>Pranzo</span>
+          <span class="preset-badge" style="background:#22272e; color:#8b949e;">13:00</span>
+        </div>
+        <!-- Trading EURUSD / XAUUSD -->
+        <div class="preset-item" onclick="quickAdd('Trading EURUSD / XAUUSD', '14:30', '16:30', 'trade')">
+          <span>Trading FX / Gold</span>
+          <span class="preset-badge" style="background:#122c1d; color:var(--accent-green);">14:30</span>
+        </div>
+        <!-- Trading Indici USA -->
+        <div class="preset-item" onclick="quickAdd('Trading Indici USA', '15:30', '17:30', 'trade')">
+          <span>Trading Indici (US Open)</span>
           <span class="preset-badge" style="background:#122c1d; color:var(--accent-green);">15:30</span>
         </div>
         <div class="preset-item" onclick="quickAdd('Allenamento (1h)', '17:30', '18:30', 'sport')">
@@ -550,18 +560,18 @@
         </select>
 
         <label>Nome Attività</label>
-        <input type="text" id="customTitle" placeholder="Es. Studio / Palestra...">
+        <input type="text" id="customTitle" placeholder="Es. EURUSD / Gold / Indici...">
 
         <label>Ora Inizio</label>
-        <input type="time" id="customStart" value="15:30">
+        <input type="time" id="customStart" value="14:30">
 
         <label>Ora Fine</label>
-        <input type="time" id="customEnd" value="17:30">
+        <input type="time" id="customEnd" value="16:30">
 
         <label>Categoria</label>
         <select id="customType">
           <option value="routine">Grigio - Routine</option>
-          <option value="trade">Verde - Trading</option>
+          <option value="trade" selected>Verde - Trading</option>
           <option value="sport">Arancione - Sport</option>
           <option value="free">Blu - Tempo Libero</option>
           <option value="custom">Viola - Altro</option>
@@ -638,7 +648,6 @@
     const db = firebase.database();
     let daysRef = null;
 
-    // CONTROLLO LOGIN
     auth.onAuthStateChanged((user) => {
       if (user) {
         document.getElementById("loginOverlay").style.display = "none";
@@ -700,10 +709,10 @@
     const defaultStructure = {
       "1": {
         "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
-        "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "12:30", type: "free" },
-        "12_30": { title: "Pranzo", start: "12:30", end: "14:00", type: "routine" },
-        "14_00": { title: "Studio & Pre-Market", start: "14:00", end: "15:30", type: "free" },
-        "15_30": { title: "Trading USA", start: "15:30", end: "17:30", type: "trade" },
+        "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "13:00", type: "free" },
+        "13_00": { title: "Pranzo", start: "13:00", end: "13:30", type: "routine" },
+        "13_30": { title: "Pre-Market / Prep Dati", start: "13:30", end: "14:30", type: "free" },
+        "14_30": { title: "Trading EURUSD / XAUUSD", start: "14:30", end: "16:30", type: "trade" },
         "17_30": { title: "Allenamento (1h)", start: "17:30", end: "18:30", type: "sport" },
         "18_30": { title: "Tempo Libero / Studio", start: "18:30", end: "20:30", type: "free" },
         "20_30": { title: "Cena & Relax", start: "20:30", end: "21:30", type: "routine" },
@@ -713,9 +722,9 @@
       "2": {
         "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
         "09_30": { title: "Tempo Libero", start: "09:30", end: "13:00", type: "free" },
-        "13_00": { title: "Pranzo", start: "13:00", end: "14:30", type: "routine" },
-        "14_30": { title: "Check Pre-Market", start: "14:30", end: "15:30", type: "free" },
-        "15_30": { title: "Trading USA", start: "15:30", end: "17:30", type: "trade" },
+        "13_00": { title: "Pranzo", start: "13:00", end: "14:00", type: "routine" },
+        "14_00": { title: "Pre-Market US Open", start: "14:00", end: "15:30", type: "free" },
+        "15_30": { title: "Trading Indici USA", start: "15:30", end: "17:30", type: "trade" },
         "17_30": { title: "Tempo Libero / Studio", start: "17:30", end: "20:30", type: "free" },
         "20_30": { title: "Cena", start: "20:30", end: "21:30", type: "routine" },
         "21_30": { title: "Gaming al PC", start: "21:30", end: "00:00", type: "free" },
@@ -723,10 +732,10 @@
       },
       "3": {
         "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
-        "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "12:30", type: "free" },
-        "12_30": { title: "Pranzo", start: "12:30", end: "14:00", type: "routine" },
-        "14_00": { title: "Studio & Review", start: "14:00", end: "15:30", type: "free" },
-        "15_30": { title: "Trading USA", start: "15:30", end: "17:30", type: "trade" },
+        "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "13:00", type: "free" },
+        "13_00": { title: "Pranzo", start: "13:00", end: "13:30", type: "routine" },
+        "13_30": { title: "Pre-Market / Prep Dati", start: "13:30", end: "14:30", type: "free" },
+        "14_30": { title: "Trading EURUSD / XAUUSD", start: "14:30", end: "16:30", type: "trade" },
         "17_30": { title: "Allenamento (1h)", start: "17:30", end: "18:30", type: "sport" },
         "18_30": { title: "Relax / Tempo Libero", start: "18:30", end: "20:30", type: "free" },
         "20_30": { title: "Cena", start: "20:30", end: "21:30", type: "routine" },
@@ -735,10 +744,10 @@
       },
       "4": {
         "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
-        "09_30": { title: "Tempo Libero", start: "09:30", end: "12:30", type: "free" },
-        "12_30": { title: "Pranzo", start: "12:30", end: "14:00", type: "routine" },
-        "14_00": { title: "Check Pre-Market", start: "14:00", end: "15:30", type: "free" },
-        "15_30": { title: "Trading USA", start: "15:30", end: "17:30", type: "trade" },
+        "09_30": { title: "Tempo Libero", start: "09:30", end: "13:00", type: "free" },
+        "13_00": { title: "Pranzo", start: "13:00", end: "14:00", type: "routine" },
+        "14_00": { title: "Pre-Market US Open", start: "14:00", end: "15:30", type: "free" },
+        "15_30": { title: "Trading Indici USA", start: "15:30", end: "17:30", type: "trade" },
         "17_30": { title: "Allenamento (1h)", start: "17:30", end: "18:30", type: "sport" },
         "18_30": { title: "Tempo Libero", start: "18:30", end: "20:30", type: "free" },
         "20_30": { title: "Cena", start: "20:30", end: "21:30", type: "routine" },
@@ -747,10 +756,10 @@
       },
       "5": {
         "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
-        "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "12:30", type: "free" },
-        "12_30": { title: "Pranzo", start: "12:30", end: "14:00", type: "routine" },
-        "14_00": { title: "Weekly Review", start: "14:00", end: "15:30", type: "free" },
-        "15_30": { title: "Trading USA (Opzionale)", start: "15:30", end: "17:30", type: "trade" },
+        "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "13:00", type: "free" },
+        "13_00": { title: "Pranzo", start: "13:00", end: "13:30", type: "routine" },
+        "13_30": { title: "Weekly Review", start: "13:30", end: "14:30", type: "free" },
+        "14_30": { title: "Trading FX / Gold (Opzionale)", start: "14:30", end: "16:30", type: "trade" },
         "17_30": { title: "Relax Fine Settimana", start: "17:30", end: "20:30", type: "free" },
         "20_30": { title: "Cena / Uscita Venerdì", start: "20:30", end: "22:00", type: "free" },
         "22_00": { title: "Gaming / Tempo Libero", start: "22:00", end: "00:00", type: "free" },
@@ -759,16 +768,16 @@
       "6": {
         "10_00": { title: "Sveglia Comoda", start: "10:00", end: "10:30", type: "routine" },
         "10_30": { title: "Tempo Libero / Gaming", start: "10:30", end: "13:00", type: "free" },
-        "13_00": { title: "Pranzo", start: "13:00", end: "14:30", type: "routine" },
-        "14_30": { title: "Pomeriggio Libero", start: "14:30", end: "20:30", type: "free" },
+        "13_00": { title: "Pranzo", start: "13:00", end: "14:00", type: "routine" },
+        "14_00": { title: "Pomeriggio Libero", start: "14:00", end: "20:30", type: "free" },
         "20_30": { title: "Cena / Serata Libera", start: "20:30", end: "00:00", type: "free" },
         "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
       },
       "0": {
         "10_00": { title: "Sveglia Comoda", start: "10:00", end: "10:30", type: "routine" },
-        "10_30": { title: "Tempo Libero", start: "10:30", end: "12:30", type: "free" },
-        "12_30": { title: "Pranzo in Famiglia", start: "12:30", end: "15:00", type: "routine" },
-        "15_00": { title: "Gaming / Serie TV", start: "15:00", end: "19:00", type: "free" },
+        "10_30": { title: "Tempo Libero", start: "10:30", end: "13:00", type: "free" },
+        "13_00": { title: "Pranzo in Famiglia", start: "13:00", end: "14:00", type: "routine" },
+        "14_00": { title: "Gaming / Serie TV", start: "14:00", end: "19:00", type: "free" },
         "19_00": { title: "Check Mercati", start: "19:00", end: "20:30", type: "free" },
         "20_30": { title: "Cena & Relax", start: "20:30", end: "21:30", type: "routine" },
         "21_30": { title: "Chill / Film", start: "21:30", end: "00:00", type: "free" },
@@ -776,24 +785,28 @@
       }
     };
 
+    /* Pulizia del passato: unisce le attività predefinite a quelle aggiunte da te nei giorni correnti/futuri */
     function syncFromTodayOnwards() {
       if (!daysRef) return;
       const todayIndex = new Date().getDay(); 
-      if (confirm("Ripristinare il calendario cancellando i giorni passati?")) {
-        daysRef.set(null).then(() => {
-          let newStruct = {};
-          const weekOrder = [1, 2, 3, 4, 5, 6, 0];
-          const todayPos = weekOrder.indexOf(todayIndex);
+      if (confirm("Ripristinare la routine pulendo i giorni passati e conservando le tue attività correnti e future?")) {
+        
+        let newStruct = {};
+        const weekOrder = [1, 2, 3, 4, 5, 6, 0];
+        const todayPos = weekOrder.indexOf(todayIndex);
 
-          weekOrder.forEach((d, idx) => {
-            if (idx >= todayPos) {
-              newStruct[d] = defaultStructure[d];
-            }
-          });
+        weekOrder.forEach((d, idx) => {
+          if (idx >= todayPos) {
+            const currentEvents = localDaysData[d] || {};
+            const baseEvents = defaultStructure[d] || {};
+            newStruct[d] = { ...baseEvents, ...currentEvents };
+          }
+        });
 
-          return daysRef.set(newStruct);
-        }).then(() => {
-          alert("Giorno pulito con successo!");
+        daysRef.set(newStruct).then(() => {
+          alert("Passato pulito e attività correnti conservate!");
+        }).catch(err => {
+          alert("Errore salvataggio Firebase: " + err.message);
         });
       }
     }
@@ -839,49 +852,60 @@
     }
 
     function renderEvents() {
-      document.querySelectorAll(".day-column").forEach(col => col.innerHTML = "");
+  // 1. Svuota completamente tutte le colonne per evitare duplicati visivi
+  document.querySelectorAll(".day-column").forEach(col => col.innerHTML = "");
 
-      Object.keys(localDaysData).forEach(dayKey => {
-        const hoursObj = localDaysData[dayKey];
-        const col = document.querySelector(`.day-column[data-day="${dayKey}"]`);
-        if (!col || !hoursObj) return;
+  Object.keys(localDaysData).forEach(dayKey => {
+    const hoursObj = localDaysData[dayKey];
+    const col = document.querySelector(`.day-column[data-day="${dayKey}"]`);
+    if (!col || !hoursObj) return;
 
-        Object.keys(hoursObj).forEach(hourKey => {
-          const ev = hoursObj[hourKey];
-          if (!ev) return;
+    // Convertiamo in array e ordiniamo gli eventi per orario di inizio
+    const eventsArray = Object.keys(hoursObj).map(key => ({
+      hourKey: key,
+      ...hoursObj[key]
+    })).sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
 
-          const top = timeToTop(ev.start);
-          const bottom = timeToTop(ev.end);
-          const height = Math.max(bottom - top, 28);
+    eventsArray.forEach(ev => {
+      if (!ev || !ev.start || !ev.end) return;
 
-          const card = document.createElement("div");
-          card.className = `event-card type-${ev.type}`;
-          card.draggable = true;
-          card.style.top = `${top}px`;
-          card.style.height = `${height}px`;
+      const top = timeToTop(ev.start);
+      const bottom = timeToTop(ev.end);
+      const height = Math.max(bottom - top, 24); // Altezza minima garantita
 
-          card.innerHTML = `
-            <div class="event-top">
-              <div class="title">${ev.title}</div>
-              <div class="event-actions">
-                <span class="event-btn" onclick="editEvent(${dayKey}, '${hourKey}', event)">✏️</span>
-                <span class="event-btn" onclick="removeEvent(${dayKey}, '${hourKey}', event)">×</span>
-              </div>
-            </div>
-            <div class="time">${ev.start} - ${ev.end}</div>
-          `;
+      const card = document.createElement("div");
+      card.className = `event-card type-${ev.type || 'routine'}`;
+      card.draggable = true;
+      card.style.top = `${top}px`;
+      card.style.height = `${height}px`;
 
-          card.addEventListener("dragstart", () => {
-            draggedData = { day: dayKey, hourKey: hourKey, event: ev };
-          });
+      // Se l'altezza è poca (es. 30 min o meno), compatta la visualizzazione
+      const isShort = height < 40;
 
-          col.appendChild(card);
-        });
+      card.innerHTML = `
+        <div class="event-top" style="${isShort ? 'align-items: center;' : ''}">
+          <div class="title" style="${isShort ? 'font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;' : ''}">
+            ${ev.title}
+          </div>
+          <div class="event-actions">
+            <span class="event-btn" onclick="editEvent(${dayKey}, '${ev.hourKey}', event)">✏️</span>
+            <span class="event-btn" onclick="removeEvent(${dayKey}, '${ev.hourKey}', event)">×</span>
+          </div>
+        </div>
+        ${!isShort ? `<div class="time">${ev.start} - ${ev.end}</div>` : ''}
+      `;
+
+      card.addEventListener("dragstart", () => {
+        draggedData = { day: dayKey, hourKey: ev.hourKey, event: ev };
       });
 
-      setupDropZones();
-      highlightToday();
-    }
+      col.appendChild(card);
+    });
+  });
+
+  setupDropZones();
+  highlightToday();
+}
 
     function setupDropZones() {
       document.querySelectorAll(".day-column").forEach(col => {
@@ -920,6 +944,8 @@
             start: newStart,
             end: newEnd,
             type: oldEv.type
+          }).catch(err => {
+            alert("Errore Firebase: " + err.message);
           });
 
           draggedData = null;
@@ -935,6 +961,8 @@
         start: start,
         end: end,
         type: type
+      }).catch(err => {
+        alert("Errore salvataggio: " + err.message);
       });
     }
 
@@ -983,18 +1011,22 @@
       
       if (newHourKey !== hourKey) {
         daysRef.child(`${day}/${hourKey}`).remove().then(() => {
-          daysRef.child(`${day}/${newHourKey}`).set({
+          return daysRef.child(`${day}/${newHourKey}`).set({
             title: updatedTitle,
             start: updatedStart,
             end: updatedEnd,
             type: ev.type
           });
+        }).catch(err => {
+          alert("Errore modifica: " + err.message);
         });
       } else {
         daysRef.child(`${day}/${hourKey}`).update({
           title: updatedTitle,
           start: updatedStart,
           end: updatedEnd
+        }).catch(err => {
+          alert("Errore modifica: " + err.message);
         });
       }
     }
@@ -1002,7 +1034,9 @@
     function removeEvent(day, hourKey, e) {
       if (e) e.stopPropagation();
       if (!daysRef) return;
-      daysRef.child(`${day}/${hourKey}`).remove();
+      daysRef.child(`${day}/${hourKey}`).remove().catch(err => {
+        alert("Errore cancellazione: " + err.message);
+      });
     }
 
     function highlightToday() {
