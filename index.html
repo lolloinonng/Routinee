@@ -1,1088 +1,608 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Routine Settimanale (Trading & Protetta)</title>
-  <style>
-    :root {
-      --bg-dark: #0d1117;
-      --card-bg: #161b22;
-      --border-color: #30363d;
-      --text-main: #c9d1d9;
-      --text-muted: #8b949e;
-      --accent-blue: #58a6ff;
-      --accent-green: #2ea043;
-      --accent-orange: #d29922;
-      --accent-purple: #bc8cff;
-      --accent-red: #f85149;
-      --current-day-bg: rgba(88, 166, 255, 0.08);
-      --row-height: 64px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* OVERLAY LOGIN */
-    #loginOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: var(--bg-dark);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .login-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 24px;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 320px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-
-    .login-box h2 {
-      font-size: 16px;
-      color: #fff;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-
-    .login-box input {
-      background: var(--bg-dark);
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 10px;
-      border-radius: 4px;
-      font-size: 13px;
-    }
-
-    .login-box button {
-      background: var(--accent-blue);
-      border: none;
-      color: #000;
-      font-weight: bold;
-      padding: 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-      margin-top: 4px;
-    }
-
-    .login-box button:hover {
-      opacity: 0.9;
-    }
-
-    /* APP PRINCIPALE */
-    #appContent {
-      display: none;
-      width: 100%;
-      height: 100%;
-      flex-direction: row;
-    }
-
-    .sidebar {
-      width: 320px;
-      background-color: var(--card-bg);
-      border-right: 1px solid var(--border-color);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      overflow-y: auto;
-      flex-shrink: 0;
-    }
-
-    .sidebar h2 {
-      font-size: 13px;
-      color: #fff;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-reset {
-      background-color: #21262d;
-      color: var(--accent-blue);
-      border: 1px solid var(--accent-blue);
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .btn-reset:hover {
-      background-color: rgba(88, 166, 255, 0.2);
-    }
-
-    .btn-logout {
-      background-color: #21262d;
-      color: var(--accent-red);
-      border: 1px solid var(--accent-red);
-      padding: 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .btn-logout:hover {
-      background-color: rgba(248, 81, 73, 0.2);
-    }
-
-    .preset-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .preset-item {
-      padding: 10px 12px;
-      border-radius: 6px;
-      background: var(--bg-dark);
-      border: 1px solid var(--border-color);
-      color: #fff;
-      font-size: 12px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .preset-badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: bold;
-    }
-
-    .custom-form {
-      background: var(--bg-dark);
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .custom-form label {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .custom-form input, .custom-form select {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 8px;
-      border-radius: 4px;
-      font-size: 12px;
-    }
-
-    .custom-form button {
-      background-color: var(--accent-green);
-      color: #fff;
-      border: none;
-      padding: 10px;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 4px;
-    }
-
-    .main-content {
-      flex: 1;
-      padding: 16px;
-      overflow: auto;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .live-clock-card {
-      background: #21262d;
-      border: 1px solid var(--border-color);
-      padding: 6px 14px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: monospace;
-    }
-
-    .clock-time {
-      font-size: 16px;
-      font-weight: bold;
-      color: #fff;
-    }
-
-    .status-badge {
-      background-color: var(--accent-blue);
-      color: #000;
-      font-weight: bold;
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-    }
-
-    .mobile-day-selector {
-      display: none;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
-    }
-
-    .mobile-day-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: bold;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .mobile-day-btn.active {
-      background: var(--accent-blue);
-      color: #000;
-      border-color: var(--accent-blue);
-    }
-
-    .calendar-container {
-      display: flex;
-      flex-direction: column;
-      min-width: 900px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background-color: var(--card-bg);
-      position: relative;
-    }
-
-    .calendar-header {
-      display: grid;
-      grid-template-columns: 65px repeat(7, 1fr);
-      border-bottom: 1px solid var(--border-color);
-      background-color: #21262d;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .day-header {
-      padding: 10px 4px;
-      text-align: center;
-      font-size: 13px;
-      font-weight: bold;
-      border-left: 1px solid var(--border-color);
-    }
-
-    .day-header.today-col {
-      color: var(--accent-blue);
-      background-color: var(--current-day-bg);
-    }
-
-    .calendar-body {
-      display: grid;
-      grid-template-columns: 65px repeat(7, 1fr);
-      position: relative;
-    }
-
-    .time-column {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .time-slot {
-      height: var(--row-height);
-      font-size: 11px;
-      color: var(--text-muted);
-      text-align: right;
-      padding-right: 8px;
-      transform: translateY(-6px);
-    }
-
-    .day-column {
-      position: relative;
-      border-left: 1px solid var(--border-color);
-      background-size: 100% var(--row-height);
-      background-image: linear-gradient(to bottom, var(--border-color) 1px, transparent 1px);
-      min-height: calc(19 * var(--row-height));
-    }
-
-    .day-column.today-col {
-      background-color: var(--current-day-bg);
-    }
-
-    .day-column.drag-over {
-      background-color: rgba(88, 166, 255, 0.15);
-    }
-
-    .time-progress-line {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background-color: #ff4d4d;
-      z-index: 5;
-      pointer-events: none;
-    }
-
-    .time-progress-line::before {
-      content: '';
-      position: absolute;
-      left: -4px;
-      top: -3px;
-      width: 8px;
-      height: 8px;
-      background-color: #ff4d4d;
-      border-radius: 50%;
-    }
-
-    .event-card {
-      position: absolute;
-      left: 2px;
-      right: 2px;
-      border-radius: 4px;
-      padding: 4px 6px;
-      font-size: 11px;
-      color: #fff;
-      border-left: 4px solid;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
-      z-index: 2;
-      box-sizing: border-box;
-      cursor: grab;
-    }
-
-    .event-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 2px;
-      width: 100%;
-    }
-
-    .event-card .title {
-      font-weight: 600;
-      line-height: 1.2;
-      font-size: 11px;
-      word-break: break-word;
-    }
-
-    .event-card .time {
-      font-size: 9.5px;
-      opacity: 0.85;
-      margin-top: 2px;
-    }
-
-    .event-actions {
-      display: flex;
-      gap: 6px;
-      background: rgba(0,0,0,0.6);
-      padding: 2px 5px;
-      border-radius: 4px;
-    }
-
-    .event-btn {
-      cursor: pointer;
-      font-size: 11px;
-      color: #fff;
-    }
-
-    .type-routine { background: #22272e; border-color: #8b949e; }
-    .type-trade   { background: #122c1d; border-color: var(--accent-green); }
-    .type-sport   { background: #322511; border-color: var(--accent-orange); }
-    .type-free    { background: #162a45; border-color: var(--accent-blue); }
-    .type-custom  { background: #281a3f; border-color: var(--accent-purple); }
-
-    @media (max-width: 768px) {
-      body {
-        height: auto;
-        overflow-y: auto;
-      }
-
-      #appContent {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        width: 100%;
-        order: 2;
-        border-right: none;
-        border-top: 1px solid var(--border-color);
-      }
-
-      .main-content {
-        padding: 10px;
-        order: 1;
-      }
-
-      .mobile-day-selector {
-        display: flex;
-      }
-
-      .calendar-container {
-        min-width: 0;
-      }
-
-      .calendar-header {
-        display: none;
-      }
-
-      .calendar-body {
-        grid-template-columns: 55px 1fr;
-      }
-
-      .day-column {
-        display: none;
-      }
-
-      .day-column.mobile-active {
-        display: block;
-      }
-
-      .event-card .title {
-        font-size: 12px;
-      }
-
-      .event-card .time {
-        font-size: 10.5px;
-      }
-    }
-  </style>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Routine Calendar — Gestione Settimanale</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--blue:#4285F4;--green:#34A853;--yellow:#FBBC05;--red:#EA4335;--bg:#f8f9fa;--card:#fff;--border:#dadce0;--text:#202124;--muted:#5f6368;--radius:12px;--shadow:0 1px 2px rgba(60,64,67,.3),0 1px 3px 1px rgba(60,64,67,.15);--shadow-hover:0 2px 6px rgba(60,64,67,.3)}
+body{font-family:'Inter','Roboto',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button{font-family:inherit}
+a{color:var(--blue)}
+#authView{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#e8f0fe 0%,#f8f9fa 50%,#e6f4ea 100%)}
+.auth-card{background:var(--card);width:100%;max-width:420px;border-radius:16px;box-shadow:var(--shadow);padding:40px 32px}
+.auth-card h1{font-size:22px;font-weight:600;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.auth-card h1 span{width:36px;height:36px;border-radius:10px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:20px}
+.auth-sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+.field{margin-bottom:16px}
+.field label{font-size:13px;font-weight:500;color:var(--muted);display:block;margin-bottom:6px}
+.field input{width:100%;height:44px;border:1.5px solid var(--border);border-radius:10px;padding:0 14px;font-size:14px;outline:none;transition:.15s}
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #e8f0fe}
+.btn-primary{width:100%;height:44px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-weight:600;font-size:14px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:#3367d6}
+.btn-primary:disabled{opacity:.6;cursor:wait}
+.btn-ghost{height:44px;border:1px solid var(--border);background:#fff;border-radius:10px;padding:0 16px;font-weight:500;cursor:pointer}
+.auth-footer{margin-top:16px;text-align:center;font-size:13px;color:var(--muted)}
+.auth-footer button{background:none;border:none;color:var(--blue);font-weight:600;cursor:pointer}
+.error-box{display:none;background:#fce8e6;color:#c5221f;border:1px solid #f5c6cb;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:16px}
+.error-box.show{display:block}
+.success-box{display:none;background:#e6f4ea;color:#137333;border:1px solid #b7e1c5;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:16px}
+.success-box.show{display:block}
+#appView{display:none;min-height:100vh;flex-direction:column}
+#appView.visible{display:flex}
+.topbar{height:64px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 16px;position:sticky;top:0;z-index:20}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;white-space:nowrap}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:var(--blue);color:#fff;display:grid;place-items:center}
+.week-nav{display:flex;align-items:center;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;transition:.15s}
+.icon-btn:hover{background:var(--bg)}
+.btn-today{height:36px;padding:0 16px;border-radius:18px;border:1px solid var(--border);background:#fff;font-weight:500;font-size:13px;cursor:pointer}
+.week-label{font-size:15px;font-weight:500;min-width:180px;text-align:center}
+@media(max-width:700px){.week-label{min-width:120px;font-size:13px}}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.user-email{font-size:13px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:600px){.user-email{display:none}}
+.btn-reset{height:36px;border-radius:18px;border:1px solid #f5c6cb;background:#fce8e6;color:#c5221f;padding:0 14px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn-reset:hover{background:#f5c6cb}
+.btn-add{height:36px;border-radius:18px;border:none;background:var(--blue);color:#fff;padding:0 18px;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.btn-add:hover{background:#3367d6}
+.btn-logout{height:36px;width:36px;border-radius:50%;border:1px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.cal-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.cal-scroll{flex:1;overflow:auto;position:relative;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;will-change:scroll-position;scrollbar-gutter:stable}
+.cal-header{display:grid;grid-template-columns:56px repeat(7,1fr);min-width:900px;position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--border)}
+.cal-header-corner{border-right:1px solid var(--border)}
+.cal-header-day{padding:10px 8px;text-align:center;border-right:1px solid var(--border);background:#fff;cursor:pointer}
+.cal-header-day:last-child{border-right:none}
+.cal-header-day.today .day-date{background:var(--blue);color:#fff}
+.cal-body{display:grid;grid-template-columns:56px repeat(7,1fr);min-width:900px;min-height:600px}
+.time-gutter{border-right:1px solid var(--border);background:#fff;position:relative}
+.time-label{position:absolute;right:6px;font-size:11px;color:var(--muted);transform:translateY(-50%);background:#fff;padding:0 2px}
+.week-grid{display:contents}
+.day-col{border-right:1px solid var(--border);background:#fff;display:flex;flex-direction:column;position:relative;min-height:0}
+.day-col:last-child{border-right:none}
+.day-col.today-col{background:#f8fbff}
+.timeline{position:relative;height:calc(24 * 46px);flex:1;background:repeating-linear-gradient(to bottom,transparent 0 45px,#e8eaed 45px 46px);contain:layout paint style}
+.timeline::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to bottom,transparent 0 91px,#dadce0 91px 92px);pointer-events:none;opacity:.55}
+.timeline-click{position:absolute;inset:0;cursor:cell;z-index:1}
+.event{position:absolute;left:3px;right:3px;border-radius:7px;padding:5px 7px;cursor:pointer;overflow:hidden;border-left:4px solid transparent;box-shadow:0 1px 2px rgba(0,0,0,.14);font-size:12px;line-height:1.25;contain:layout paint;will-change:auto;z-index:2}
+.event:hover{box-shadow:0 2px 6px rgba(0,0,0,.2);z-index:4;filter:brightness(1.02)}
+.event.compact{padding:2px 6px}
+.event.compact .event-type{display:none}
+.event.compact .event-time{font-size:10px}
+.event-time{font-size:11px;font-weight:700;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event-title{font-size:12px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event.compact .event-title{font-size:11px}
+.timeline .event .event-title{white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.event-type{font-size:9px;font-weight:700;letter-spacing:.35px;text-transform:uppercase;opacity:.7;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.e-routine{background:#e8f0fe;border-left-color:var(--blue);color:#174ea6}
+.e-free{background:#e6f4ea;border-left-color:var(--green);color:#0d652d}
+.e-trade{background:#fef7e0;border-left-color:var(--yellow);color:#7a4a00}
+.e-sport{background:#fce8e6;border-left-color:var(--red);color:#a50e0e}
+.day-add{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:14px;line-height:1;margin:4px auto 0}
+.day-add:hover{background:var(--bg)}
+.day-name{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+.day-date{font-size:20px;font-weight:500;display:inline-grid;place-items:center;min-width:32px;min-height:32px;border-radius:50%}
+.day-date.today{background:var(--blue);color:#fff}
+.day-meta{font-size:11px;color:var(--muted)}
+.loading{padding:40px;text-align:center;color:var(--muted);grid-column:1/-1}
+.empty-timeline{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;color:var(--muted);background:#fff;padding:6px 10px;border-radius:20px;border:1px dashed var(--border);pointer-events:none}
+.overlay{position:fixed;inset:0;background:rgba(32,33,36,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 8px 24px rgba(0,0,0,.2);overflow:hidden;animation:pop .18s ease}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-head{padding:20px 24px 0;font-size:18px;font-weight:600}
+.modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+.modal-body .field{margin:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.select,.input{width:100%;height:42px;border:1.5px solid var(--border);border-radius:10px;padding:0 12px;font-size:14px;outline:none;background:#fff}
+.select:focus,.input:focus{border-color:var(--blue)}
+.modal-foot{padding:16px 24px 24px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.btn-danger{background:#fce8e6;color:#c5221f;border:1px solid #f5c6cb;height:40px;padding:0 16px;border-radius:10px;font-weight:600;cursor:pointer}
+.btn-danger:hover{background:#f5c6cb}
+.btn-secondary{background:#fff;border:1px solid var(--border);height:40px;padding:0 16px;border-radius:10px;font-weight:500;cursor:pointer}
+.btn-save{background:var(--blue);color:#fff;border:none;height:40px;padding:0 20px;border-radius:10px;font-weight:600;cursor:pointer}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#323232;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.3);opacity:0;transition:.25s;z-index:60;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.config-banner{display:none;background:#fef7e0;border:1px solid #fdd663;color:#7a4a00;padding:10px 14px;border-radius:10px;margin:12px 16px;font-size:13px}
+.config-banner.show{display:block}
+</style>
 </head>
 <body>
 
-  <!-- SCHERMATA LOGIN -->
-  <div id="loginOverlay">
-    <div class="login-box">
-      <h2>🔒 Accesso Riservato</h2>
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPass" placeholder="Password">
-      <button onclick="login()">Accedi</button>
+<div id="authView">
+  <form class="auth-card" id="loginForm" onsubmit="return false">
+    <h1><span class="material-symbols-rounded">calendar_month</span> Routine Calendar</h1>
+    <p class="auth-sub">Accedi per gestire la tua routine settimanale. I dati sono salvati in modo sicuro su Firebase.</p>
+    <div id="authError" class="error-box"></div>
+    <div id="authSuccess" class="success-box"></div>
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="nome@esempio.com" autocomplete="email" required>
     </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+    </div>
+    <button class="btn-primary" id="btnLogin" type="submit"><span class="material-symbols-rounded" style="font-size:18px">login</span> Accedi</button>
+    <div class="auth-footer">
+      Non hai un account? <button type="button" id="btnGoRegister">Registrati</button>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted)">Demo: crea un utente da Firebase Console → Authentication → Add user</div>
+    </div>
+  </form>
+</div>
+
+<div id="appView">
+  <header class="topbar">
+    <div class="logo"><div class="logo-icon"><span class="material-symbols-rounded">calendar_month</span></div> Routine</div>
+    <div class="week-nav">
+      <button class="icon-btn" id="btnPrev" title="Settimana precedente"><span class="material-symbols-rounded">chevron_left</span></button>
+      <button class="icon-btn" id="btnNext" title="Settimana successiva"><span class="material-symbols-rounded">chevron_right</span></button>
+      <button class="btn-today" id="btnToday">Oggi</button>
+    </div>
+    <div class="week-label" id="weekLabel">—</div>
+    <div class="topbar-right">
+      <button class="btn-reset" id="btnReset" title="Sovrascrive la settimana con la routine predefinita"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle">restart_alt</span> Ripristina Routine Predefinita</button>
+      <button class="btn-add" id="btnAddGlobal"><span class="material-symbols-rounded" style="font-size:18px">add</span> Nuovo evento</button>
+      <span class="user-email" id="userEmail"></span>
+      <button class="btn-logout" id="btnLogout" title="Logout"><span class="material-symbols-rounded">logout</span></button>
+    </div>
+  </header>
+
+  <div id="configBanner" class="config-banner">⚠️ Configura <b>firebaseConfig</b> in <code>index.html</code> con i dati del tuo progetto Firebase (vedi commento nel codice). L'app usa Realtime Database + Auth Email/Password.</div>
+
+  <div class="legend">
+    <span style="font-weight:600;color:var(--text)">Legenda:</span>
+    <span><i class="dot" style="background:var(--blue)"></i> routine</span>
+    <span><i class="dot" style="background:var(--green)"></i> free</span>
+    <span><i class="dot" style="background:var(--yellow)"></i> trade</span>
+    <span><i class="dot" style="background:var(--red)"></i> sport</span>
+    <span style="margin-left:auto;color:var(--muted)">Dati in <code>/users/{uid}/weeks/{weekId}</code> • Sync realtime</span>
   </div>
 
-  <!-- CONTENUTO DEL SITO -->
-  <div id="appContent">
-    <div class="sidebar">
-      <button class="btn-reset" onclick="syncFromTodayOnwards()">🔄 Pulisci Passato e Ripristina</button>
-      
-      <h2>Suggerimenti Rapidi</h2>
-      <div class="preset-list">
-        <div class="preset-item" onclick="quickAdd('Sveglia & Igiene', '09:00', '09:30', 'routine')">
-          <span>Sveglia & Igiene</span>
-          <span class="preset-badge" style="background:#22272e; color:#8b949e;">09:00</span>
-        </div>
-        <div class="preset-item" onclick="quickAdd('Pranzo (30m/1h)', '13:00', '13:30', 'routine')">
-          <span>Pranzo</span>
-          <span class="preset-badge" style="background:#22272e; color:#8b949e;">13:00</span>
-        </div>
-        <!-- Trading EURUSD / XAUUSD -->
-        <div class="preset-item" onclick="quickAdd('Trading EURUSD / XAUUSD', '14:30', '16:30', 'trade')">
-          <span>Trading FX / Gold</span>
-          <span class="preset-badge" style="background:#122c1d; color:var(--accent-green);">14:30</span>
-        </div>
-        <!-- Trading Indici USA -->
-        <div class="preset-item" onclick="quickAdd('Trading Indici USA', '15:30', '17:30', 'trade')">
-          <span>Trading Indici (US Open)</span>
-          <span class="preset-badge" style="background:#122c1d; color:var(--accent-green);">15:30</span>
-        </div>
-        <div class="preset-item" onclick="quickAdd('Allenamento (1h)', '17:30', '18:30', 'sport')">
-          <span>Allenamento (1h)</span>
-          <span class="preset-badge" style="background:#322511; color:var(--accent-orange);">17:30</span>
-        </div>
-        <div class="preset-item" onclick="quickAdd('Gaming al PC (2h)', '21:00', '23:00', 'free')">
-          <span>Gaming al PC (2h)</span>
-          <span class="preset-badge" style="background:#162a45; color:var(--accent-blue);">21:00</span>
-        </div>
-      </div>
-
-      <h2>Aggiungi Personalizzato</h2>
-      <div class="custom-form">
-        <label>Giorno</label>
-        <select id="customDay">
-          <option value="1">Lunedì</option>
-          <option value="2">Martedì</option>
-          <option value="3">Mercoledì</option>
-          <option value="4" selected>Giovedì</option>
-          <option value="5">Venerdì</option>
-          <option value="6">Sabato</option>
-          <option value="0">Domenica</option>
-        </select>
-
-        <label>Nome Attività</label>
-        <input type="text" id="customTitle" placeholder="Es. EURUSD / Gold / Indici...">
-
-        <label>Ora Inizio</label>
-        <input type="time" id="customStart" value="14:30">
-
-        <label>Ora Fine</label>
-        <input type="time" id="customEnd" value="16:30">
-
-        <label>Categoria</label>
-        <select id="customType">
-          <option value="routine">Grigio - Routine</option>
-          <option value="trade" selected>Verde - Trading</option>
-          <option value="sport">Arancione - Sport</option>
-          <option value="free">Blu - Tempo Libero</option>
-          <option value="custom">Viola - Altro</option>
-        </select>
-
-        <button onclick="addCustomEvent()">+ Aggiungi Attività</button>
-      </div>
-
-      <button class="btn-logout" onclick="logout()">🚪 Esci dall'account</button>
-    </div>
-
-    <div class="main-content">
-      <div class="header-bar">
-        <h1>Routine Settimanale (06:00 - 01:00)</h1>
-        
-        <div class="header-right">
-          <div class="live-clock-card">
-            <span class="clock-icon">🕒</span>
-            <span class="clock-time" id="liveClock">00:00:00</span>
-          </div>
-          <span class="status-badge" id="currentDayBadge">Oggi è ...</span>
-        </div>
-      </div>
-
-      <div class="mobile-day-selector">
-        <button class="mobile-day-btn" data-mday="1" onclick="switchMobileDay(1)">Lunedì</button>
-        <button class="mobile-day-btn" data-mday="2" onclick="switchMobileDay(2)">Martedì</button>
-        <button class="mobile-day-btn" data-mday="3" onclick="switchMobileDay(3)">Mercoledì</button>
-        <button class="mobile-day-btn" data-mday="4" onclick="switchMobileDay(4)">Giovedì</button>
-        <button class="mobile-day-btn" data-mday="5" onclick="switchMobileDay(5)">Venerdì</button>
-        <button class="mobile-day-btn" data-mday="6" onclick="switchMobileDay(6)">Sabato</button>
-        <button class="mobile-day-btn" data-mday="0" onclick="switchMobileDay(0)">Domenica</button>
-      </div>
-
-      <div class="calendar-container">
-        <div class="calendar-header">
-          <div></div>
-          <div class="day-header" data-day="1">Lunedì</div>
-          <div class="day-header" data-day="2">Martedì</div>
-          <div class="day-header" data-day="3">Mercoledì</div>
-          <div class="day-header" data-day="4">Giovedì</div>
-          <div class="day-header" data-day="5">Venerdì</div>
-          <div class="day-header" data-day="6">Sabato</div>
-          <div class="day-header" data-day="0">Domenica</div>
-        </div>
-
-        <div class="calendar-body">
-          <div class="time-column" id="timeColumn"></div>
-          <div class="day-column" data-day="1"></div>
-          <div class="day-column" data-day="2"></div>
-          <div class="day-column" data-day="3"></div>
-          <div class="day-column" data-day="4"></div>
-          <div class="day-column" data-day="5"></div>
-          <div class="day-column" data-day="6"></div>
-          <div class="day-column" data-day="0"></div>
-        </div>
+  <div class="cal-wrap">
+    <div class="cal-scroll" id="calScroll">
+      <div class="cal-header" id="calHeader"></div>
+      <div class="cal-body" id="calBody">
+        <div class="time-gutter" id="timeGutter"></div>
+        <div class="week-grid" id="weekGrid"></div>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAzjGvo43AQpvGrDjIpJ1YCxTs0wljn6cI",
-      authDomain: "routine-d2347.firebaseapp.com",
-      databaseURL: "https://routine-d2347-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "routine-d2347",
-      storageBucket: "routine-d2347.firebasestorage.app",
-      messagingSenderId: "417271086293",
-      appId: "1:417271086293:web:057448370e230bfb94765c"
-    };
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head" id="modalTitle">Nuovo evento</div>
+    <div class="modal-body">
+      <div class="field"><label>Giorno</label><select id="mDay" class="select"><option value="1">Lunedì</option><option value="2">Martedì</option><option value="3">Mercoledì</option><option value="4">Giovedì</option><option value="5">Venerdì</option><option value="6">Sabato</option><option value="0">Domenica</option></select></div>
+      <div class="row2"><div class="field"><label>Ora inizio</label><input id="mStart" class="input" type="time" required></div><div class="field"><label>Ora fine</label><input id="mEnd" class="input" type="time" required></div></div>
+      <div class="field"><label>Titolo</label><input id="mTitle" class="input" type="text" placeholder="Es. Trading EURUSD" maxlength="80" required></div>
+      <div class="field"><label>Tipo</label><select id="mType" class="select"><option value="routine">routine — Blu</option><option value="free">free — Verde</option><option value="trade">trade — Giallo</option><option value="sport">sport — Rosso</option></select></div>
+      <div id="modalError" class="error-box" style="margin:0"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-danger" id="btnDelete" style="display:none;margin-right:auto">Elimina</button>
+      <button class="btn-secondary" id="btnCancel">Annulla</button>
+      <button class="btn-save" id="btnSave">Salva</button>
+    </div>
+  </div>
+</div>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-    let daysRef = null;
+<div id="toast" class="toast"></div>
 
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        document.getElementById("loginOverlay").style.display = "none";
-        document.getElementById("appContent").style.display = "flex";
-        
-        daysRef = db.ref("giorni");
-        daysRef.on("value", (snapshot) => {
-          localDaysData = snapshot.val() || {};
-          renderEvents();
-          updateTimeProgress();
-        });
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+    "firebase/database": "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
+  }
+}
+</script>
 
-        const today = new Date().getDay();
-        switchMobileDay(today);
-
-      } else {
-        document.getElementById("loginOverlay").style.display = "flex";
-        document.getElementById("appContent").style.display = "none";
-      }
-    });
-
-    function login() {
-      const email = document.getElementById("loginEmail").value;
-      const pass = document.getElementById("loginPass").value;
-      auth.signInWithEmailAndPassword(email, pass).catch(err => {
-        alert("Errore di accesso: " + err.message);
-      });
-    }
-
-    function logout() {
-      auth.signOut();
-    }
-
-    function switchMobileDay(dayKey) {
-      document.querySelectorAll(".mobile-day-btn").forEach(btn => {
-        if (parseInt(btn.dataset.mday) === dayKey) {
-          btn.classList.add("active");
-        } else {
-          btn.classList.remove("active");
+<script type="module">
+/*
+  ============================================================================
+  FIREBASE SECURITY RULES — Realtime Database
+  Inserisci queste regole nella Firebase Console → Realtime Database → Rules
+  ============================================================================
+  {
+    "rules": {
+      "users": {
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          ".write": "auth != null && auth.uid == $uid"
         }
-      });
-
-      document.querySelectorAll(".day-column").forEach(col => {
-        if (parseInt(col.dataset.day) === dayKey) {
-          col.classList.add("mobile-active");
-        } else {
-          col.classList.remove("mobile-active");
-        }
-      });
-    }
-
-    const START_HOUR = 6;  
-    const END_HOUR = 25;   
-    const ROW_HEIGHT = 64;
-
-    let localDaysData = {};
-    let draggedData = null;
-
-    const defaultStructure = {
-      "1": {
-        "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
-        "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "13:00", type: "free" },
-        "13_00": { title: "Pranzo", start: "13:00", end: "13:30", type: "routine" },
-        "13_30": { title: "Pre-Market / Prep Dati", start: "13:30", end: "14:30", type: "free" },
-        "14_30": { title: "Trading EURUSD / XAUUSD", start: "14:30", end: "16:30", type: "trade" },
-        "17_30": { title: "Allenamento (1h)", start: "17:30", end: "18:30", type: "sport" },
-        "18_30": { title: "Tempo Libero / Studio", start: "18:30", end: "20:30", type: "free" },
-        "20_30": { title: "Cena & Relax", start: "20:30", end: "21:30", type: "routine" },
-        "21_30": { title: "Gaming / Serie TV", start: "21:30", end: "00:00", type: "free" },
-        "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
-      },
-      "2": {
-        "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
-        "09_30": { title: "Tempo Libero", start: "09:30", end: "13:00", type: "free" },
-        "13_00": { title: "Pranzo", start: "13:00", end: "14:00", type: "routine" },
-        "14_00": { title: "Pre-Market US Open", start: "14:00", end: "15:30", type: "free" },
-        "15_30": { title: "Trading Indici USA", start: "15:30", end: "17:30", type: "trade" },
-        "17_30": { title: "Tempo Libero / Studio", start: "17:30", end: "20:30", type: "free" },
-        "20_30": { title: "Cena", start: "20:30", end: "21:30", type: "routine" },
-        "21_30": { title: "Gaming al PC", start: "21:30", end: "00:00", type: "free" },
-        "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
-      },
-      "3": {
-        "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
-        "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "13:00", type: "free" },
-        "13_00": { title: "Pranzo", start: "13:00", end: "13:30", type: "routine" },
-        "13_30": { title: "Pre-Market / Prep Dati", start: "13:30", end: "14:30", type: "free" },
-        "14_30": { title: "Trading EURUSD / XAUUSD", start: "14:30", end: "16:30", type: "trade" },
-        "17_30": { title: "Allenamento (1h)", start: "17:30", end: "18:30", type: "sport" },
-        "18_30": { title: "Relax / Tempo Libero", start: "18:30", end: "20:30", type: "free" },
-        "20_30": { title: "Cena", start: "20:30", end: "21:30", type: "routine" },
-        "21_30": { title: "Gaming / Serie TV", start: "21:30", end: "00:00", type: "free" },
-        "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
-      },
-      "4": {
-        "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
-        "09_30": { title: "Tempo Libero", start: "09:30", end: "13:00", type: "free" },
-        "13_00": { title: "Pranzo", start: "13:00", end: "14:00", type: "routine" },
-        "14_00": { title: "Pre-Market US Open", start: "14:00", end: "15:30", type: "free" },
-        "15_30": { title: "Trading Indici USA", start: "15:30", end: "17:30", type: "trade" },
-        "17_30": { title: "Allenamento (1h)", start: "17:30", end: "18:30", type: "sport" },
-        "18_30": { title: "Tempo Libero", start: "18:30", end: "20:30", type: "free" },
-        "20_30": { title: "Cena", start: "20:30", end: "21:30", type: "routine" },
-        "21_30": { title: "Gaming al PC", start: "21:30", end: "00:00", type: "free" },
-        "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
-      },
-      "5": {
-        "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
-        "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "13:00", type: "free" },
-        "13_00": { title: "Pranzo", start: "13:00", end: "13:30", type: "routine" },
-        "13_30": { title: "Weekly Review", start: "13:30", end: "14:30", type: "free" },
-        "14_30": { title: "Trading FX / Gold (Opzionale)", start: "14:30", end: "16:30", type: "trade" },
-        "17_30": { title: "Relax Fine Settimana", start: "17:30", end: "20:30", type: "free" },
-        "20_30": { title: "Cena / Uscita Venerdì", start: "20:30", end: "22:00", type: "free" },
-        "22_00": { title: "Gaming / Tempo Libero", start: "22:00", end: "00:00", type: "free" },
-        "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
-      },
-      "6": {
-        "10_00": { title: "Sveglia Comoda", start: "10:00", end: "10:30", type: "routine" },
-        "10_30": { title: "Tempo Libero / Gaming", start: "10:30", end: "13:00", type: "free" },
-        "13_00": { title: "Pranzo", start: "13:00", end: "14:00", type: "routine" },
-        "14_00": { title: "Pomeriggio Libero", start: "14:00", end: "20:30", type: "free" },
-        "20_30": { title: "Cena / Serata Libera", start: "20:30", end: "00:00", type: "free" },
-        "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
-      },
-      "0": {
-        "10_00": { title: "Sveglia Comoda", start: "10:00", end: "10:30", type: "routine" },
-        "10_30": { title: "Tempo Libero", start: "10:30", end: "13:00", type: "free" },
-        "13_00": { title: "Pranzo in Famiglia", start: "13:00", end: "14:00", type: "routine" },
-        "14_00": { title: "Gaming / Serie TV", start: "14:00", end: "19:00", type: "free" },
-        "19_00": { title: "Check Mercati", start: "19:00", end: "20:30", type: "free" },
-        "20_30": { title: "Cena & Relax", start: "20:30", end: "21:30", type: "routine" },
-        "21_30": { title: "Chill / Film", start: "21:30", end: "00:00", type: "free" },
-        "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
-      }
-    };
-
-    /* Pulizia del passato: unisce le attività predefinite a quelle aggiunte da te nei giorni correnti/futuri */
-    function syncFromTodayOnwards() {
-      if (!daysRef) return;
-      const todayIndex = new Date().getDay(); 
-      if (confirm("Ripristinare la routine pulendo i giorni passati e conservando le tue attività correnti e future?")) {
-        
-        let newStruct = {};
-        const weekOrder = [1, 2, 3, 4, 5, 6, 0];
-        const todayPos = weekOrder.indexOf(todayIndex);
-
-        weekOrder.forEach((d, idx) => {
-          if (idx >= todayPos) {
-            const currentEvents = localDaysData[d] || {};
-            const baseEvents = defaultStructure[d] || {};
-            newStruct[d] = { ...baseEvents, ...currentEvents };
-          }
-        });
-
-        daysRef.set(newStruct).then(() => {
-          alert("Passato pulito e attività correnti conservate!");
-        }).catch(err => {
-          alert("Errore salvataggio Firebase: " + err.message);
-        });
       }
     }
+  }
+  - Ogni utente legge/scrive SOLO sotto /users/{suo uid}
+  - Percorso dati: /users/{uid}/weeks/{weekId}
+  - weekId = lunedì della settimana in formato YYYY-MM-DD (es. 2026-08-24)
+  - Abilita Email/Password in Authentication → Sign-in method
+  ============================================================================
+  CONFIGURAZIONE FIREBASE:
+  1. Crea progetto su https://console.firebase.google.com
+  2. Aggiungi App Web → copia firebaseConfig
+  3. Sostituisci l'oggetto firebaseConfig qui sotto
+  4. Crea Realtime Database (region europe-west1 consigliata)
+  5. Incolla le Rules qui sopra e pubblica
+  ============================================================================
+*/
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
+import { getDatabase, ref, onValue, off, get, set, remove } from "firebase/database";
 
-    function updateClock() {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      document.getElementById("liveClock").innerText = `${h}:${m}:${s}`;
-      updateTimeProgress();
-    }
-    setInterval(updateClock, 1000);
+const firebaseConfig = {
+  apiKey: "AIzaSyAzjGvo43AQpvGrDjIpJ1YCxTs0wljn6cI",
+  authDomain: "routine-d2347.firebaseapp.com",
+  databaseURL: "https://routine-d2347-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "routine-d2347",
+  storageBucket: "routine-d2347.firebasestorage.app",
+  messagingSenderId: "417271086293",
+  appId: "1:417271086293:web:057448370e230bfb94765c",
+  measurementId: "G-T07TTBG8MS"
+};
 
-    const timeColumn = document.getElementById("timeColumn");
-    for (let h = START_HOUR; h < END_HOUR; h++) {
-      const slot = document.createElement("div");
-      slot.className = "time-slot";
-      const displayHour = h >= 24 ? h - 24 : h;
-      slot.innerText = `${displayHour < 10 ? '0' + displayHour : displayHour}:00`;
-      timeColumn.appendChild(slot);
-    }
-
-    function timeToMinutes(timeStr) {
-      let [h, m] = timeStr.split(":").map(Number);
-      if (h < START_HOUR) h += 24;
-      return (h - START_HOUR) * 60 + m;
-    }
-
-    function timeToTop(timeStr) {
-      return (timeToMinutes(timeStr) / 60) * ROW_HEIGHT;
-    }
-
-    function minutesToTime(totalMin) {
-      let h = Math.floor(totalMin / 60) + START_HOUR;
-      let m = totalMin % 60;
-      if (h >= 24) h -= 24;
-      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    }
-
-    function sanitizeTimeKey(timeStr) {
-      return timeStr.replace(":", "_");
-    }
-
-    function renderEvents() {
-  // 1. Svuota completamente tutte le colonne per evitare duplicati visivi
-  document.querySelectorAll(".day-column").forEach(col => col.innerHTML = "");
-
-  Object.keys(localDaysData).forEach(dayKey => {
-    const hoursObj = localDaysData[dayKey];
-    const col = document.querySelector(`.day-column[data-day="${dayKey}"]`);
-    if (!col || !hoursObj) return;
-
-    // Convertiamo in array e ordiniamo gli eventi per orario di inizio
-    const eventsArray = Object.keys(hoursObj).map(key => ({
-      hourKey: key,
-      ...hoursObj[key]
-    })).sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
-
-    eventsArray.forEach(ev => {
-      if (!ev || !ev.start || !ev.end) return;
-
-      const top = timeToTop(ev.start);
-      const bottom = timeToTop(ev.end);
-      const height = Math.max(bottom - top, 24); // Altezza minima garantita
-
-      const card = document.createElement("div");
-      card.className = `event-card type-${ev.type || 'routine'}`;
-      card.draggable = true;
-      card.style.top = `${top}px`;
-      card.style.height = `${height}px`;
-
-      // Se l'altezza è poca (es. 30 min o meno), compatta la visualizzazione
-      const isShort = height < 40;
-
-      card.innerHTML = `
-        <div class="event-top" style="${isShort ? 'align-items: center;' : ''}">
-          <div class="title" style="${isShort ? 'font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;' : ''}">
-            ${ev.title}
-          </div>
-          <div class="event-actions">
-            <span class="event-btn" onclick="editEvent(${dayKey}, '${ev.hourKey}', event)">✏️</span>
-            <span class="event-btn" onclick="removeEvent(${dayKey}, '${ev.hourKey}', event)">×</span>
-          </div>
-        </div>
-        ${!isShort ? `<div class="time">${ev.start} - ${ev.end}</div>` : ''}
-      `;
-
-      card.addEventListener("dragstart", () => {
-        draggedData = { day: dayKey, hourKey: ev.hourKey, event: ev };
-      });
-
-      col.appendChild(card);
-    });
-  });
-
-  setupDropZones();
-  highlightToday();
+const isConfigured = !firebaseConfig.apiKey.includes("REPLACE");
+let app, auth, db;
+if(isConfigured){
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getDatabase(app);
+} else {
+  document.getElementById('configBanner').classList.add('show');
 }
 
-    function setupDropZones() {
-      document.querySelectorAll(".day-column").forEach(col => {
-        col.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          col.classList.add("drag-over");
-        });
+const defaultStructure = {
+  "1": {
+    "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
+    "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "13:00", type: "free" },
+    "13_00": { title: "Pranzo", start: "13:00", end: "13:30", type: "routine" },
+    "13_30": { title: "Pre-Market / Prep Dati", start: "13:30", end: "14:30", type: "free" },
+    "14_30": { title: "Trading EURUSD / XAUUSD", start: "14:30", end: "16:30", type: "trade" },
+    "17_30": { title: "Allenamento (1h)", start: "17:30", end: "18:30", type: "sport" },
+    "18_30": { title: "Tempo Libero / Studio", start: "18:30", end: "20:30", type: "free" },
+    "20_30": { title: "Cena & Relax", start: "20:30", end: "21:30", type: "routine" },
+    "21_30": { title: "Gaming / Serie TV", start: "21:30", end: "00:00", type: "free" },
+    "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
+  },
+  "2": {
+    "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
+    "09_30": { title: "Tempo Libero", start: "09:30", end: "13:00", type: "free" },
+    "13_00": { title: "Pranzo", start: "13:00", end: "14:00", type: "routine" },
+    "14_00": { title: "Pre-Market US Open", start: "14:00", end: "15:30", type: "free" },
+    "15_30": { title: "Trading Indici USA", start: "15:30", end: "17:30", type: "trade" },
+    "17_30": { title: "Tempo Libero / Studio", start: "17:30", end: "20:30", type: "free" },
+    "20_30": { title: "Cena", start: "20:30", end: "21:30", type: "routine" },
+    "21_30": { title: "Gaming al PC", start: "21:30", end: "00:00", type: "free" },
+    "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
+  },
+  "3": {
+    "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
+    "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "13:00", type: "free" },
+    "13_00": { title: "Pranzo", start: "13:00", end: "13:30", type: "routine" },
+    "13_30": { title: "Pre-Market / Prep Dati", start: "13:30", end: "14:30", type: "free" },
+    "14_30": { title: "Trading EURUSD / XAUUSD", start: "14:30", end: "16:30", type: "trade" },
+    "17_30": { title: "Allenamento (1h)", start: "17:30", end: "18:30", type: "sport" },
+    "18_30": { title: "Relax / Tempo Libero", start: "18:30", end: "20:30", type: "free" },
+    "20_30": { title: "Cena", start: "20:30", end: "21:30", type: "routine" },
+    "21_30": { title: "Gaming / Serie TV", start: "21:30", end: "00:00", type: "free" },
+    "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
+  },
+  "4": {
+    "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
+    "09_30": { title: "Tempo Libero", start: "09:30", end: "13:00", type: "free" },
+    "13_00": { title: "Pranzo", start: "13:00", end: "14:00", type: "routine" },
+    "14_00": { title: "Pre-Market US Open", start: "14:00", end: "15:30", type: "free" },
+    "15_30": { title: "Trading Indici USA", start: "15:30", end: "17:30", type: "trade" },
+    "17_30": { title: "Allenamento (1h)", start: "17:30", end: "18:30", type: "sport" },
+    "18_30": { title: "Tempo Libero", start: "18:30", end: "20:30", type: "free" },
+    "20_30": { title: "Cena", start: "20:30", end: "21:30", type: "routine" },
+    "21_30": { title: "Gaming al PC", start: "21:30", end: "00:00", type: "free" },
+    "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
+  },
+  "5": {
+    "09_00": { title: "Sveglia 9:00 / Lavaggio", start: "09:00", end: "09:30", type: "routine" },
+    "09_30": { title: "Tempo Libero / Gaming", start: "09:30", end: "13:00", type: "free" },
+    "13_00": { title: "Pranzo", start: "13:00", end: "13:30", type: "routine" },
+    "13_30": { title: "Weekly Review", start: "13:30", end: "14:30", type: "free" },
+    "14_30": { title: "Trading FX / Gold (Opzionale)", start: "14:30", end: "16:30", type: "trade" },
+    "17_30": { title: "Relax Fine Settimana", start: "17:30", end: "20:30", type: "free" },
+    "20_30": { title: "Cena / Uscita Venerdì", start: "20:30", end: "22:00", type: "free" },
+    "22_00": { title: "Gaming / Tempo Libero", start: "22:00", end: "00:00", type: "free" },
+    "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
+  },
+  "6": {
+    "10_00": { title: "Sveglia Comoda", start: "10:00", end: "10:30", type: "routine" },
+    "10_30": { title: "Tempo Libero / Gaming", start: "10:30", end: "13:00", type: "free" },
+    "13_00": { title: "Pranzo", start: "13:00", end: "14:00", type: "routine" },
+    "14_00": { title: "Pomeriggio Libero", start: "14:00", end: "20:30", type: "free" },
+    "20_30": { title: "Cena / Serata Libera", start: "20:30", end: "00:00", type: "free" },
+    "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
+  },
+  "0": {
+    "10_00": { title: "Sveglia Comoda", start: "10:00", end: "10:30", type: "routine" },
+    "10_30": { title: "Tempo Libero", start: "10:30", end: "13:00", type: "free" },
+    "13_00": { title: "Pranzo in Famiglia", start: "13:00", end: "14:00", type: "routine" },
+    "14_00": { title: "Gaming / Serie TV", start: "14:00", end: "19:00", type: "free" },
+    "19_00": { title: "Check Mercati", start: "19:00", end: "20:30", type: "free" },
+    "20_30": { title: "Cena & Relax", start: "20:30", end: "21:30", type: "routine" },
+    "21_30": { title: "Chill / Film", start: "21:30", end: "00:00", type: "free" },
+    "00_00": { title: "Prep Notte / A letto", start: "00:00", end: "01:00", type: "routine" }
+  }
+};
 
-        col.addEventListener("dragleave", () => {
-          col.classList.remove("drag-over");
-        });
+const dayNames = {1:"Lunedì",2:"Martedì",3:"Mercoledì",4:"Giovedì",5:"Venerdì",6:"Sabato",0:"Domenica"};
+const dayOrder = ["1","2","3","4","5","6","0"];
+const typeClass = {routine:"e-routine",free:"e-free",trade:"e-trade",sport:"e-sport"};
 
-        col.addEventListener("drop", (e) => {
-          e.preventDefault();
-          col.classList.remove("drag-over");
+const $ = s => document.getElementById(s);
+const authView = $("authView"), appView = $("appView");
+const weekGrid = $("weekGrid"), weekLabel = $("weekLabel");
+const overlay = $("overlay"), mDay=$("mDay"), mStart=$("mStart"), mEnd=$("mEnd"), mTitle=$("mTitle"), mType=$("mType");
+const modalError = $("modalError"), btnDelete=$("btnDelete"), modalTitle=$("modalTitle");
+const toastEl = $("toast");
 
-          if (!draggedData || !daysRef) return;
+let weekOffset = 0;
+let currentUser = null;
+let currentWeekId = null;
+let currentData = null;
+let weekRef = null;
+let isRegisterMode = false;
+let editing = null;
 
-          const rect = col.getBoundingClientRect();
-          const offsetY = e.clientY - rect.top;
-          
-          let minutesFromStart = Math.round((offsetY / ROW_HEIGHT) * 60 / 15) * 15;
-          if (minutesFromStart < 0) minutesFromStart = 0;
-
-          const oldEv = draggedData.event;
-          const duration = timeToMinutes(oldEv.end) - timeToMinutes(oldEv.start);
-
-          const newStart = minutesToTime(minutesFromStart);
-          const newEnd = minutesToTime(minutesFromStart + duration);
-          const newDay = parseInt(col.dataset.day);
-          const newHourKey = sanitizeTimeKey(newStart);
-
-          daysRef.child(`${draggedData.day}/${draggedData.hourKey}`).remove();
-          daysRef.child(`${newDay}/${newHourKey}`).set({
-            title: oldEv.title,
-            start: newStart,
-            end: newEnd,
-            type: oldEv.type
-          }).catch(err => {
-            alert("Errore Firebase: " + err.message);
-          });
-
-          draggedData = null;
-        });
-      });
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastEl._t);
+  toastEl._t = setTimeout(()=>toastEl.classList.remove("show"),2600);
+}
+function showError(el,msg){ el.textContent = msg; el.classList.add("show"); }
+function hideError(el){ el.textContent=""; el.classList.remove("show"); }
+function fbError(code){
+  const m={ "auth/invalid-email":"Email non valida.", "auth/user-not-found":"Utente non trovato. Registrati o verifica l'email.", "auth/wrong-password":"Password errata.", "auth/invalid-credential":"Credenziali non valide.", "auth/missing-password":"Inserisci la password.", "auth/weak-password":"Password troppo debole (min 6 caratteri).", "auth/email-already-in-use":"Email già registrata. Accedi.", "auth/too-many-requests":"Troppi tentativi. Riprova più tardi.", "auth/network-request-failed":"Errore di rete. Controlla la connessione." };
+  return m[code] || "Errore: "+code;
+}
+function getMonday(offset){
+  const now = new Date(); const day = now.getDay();
+  const diff = day===0 ? -6 : 1 - day;
+  const mon = new Date(now); mon.setDate(now.getDate()+diff+offset*7); mon.setHours(12,0,0,0);
+  return mon;
+}
+function weekIdFromMonday(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), da=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+function formatWeekLabel(mon){
+  const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+  const fmt = d => d.toLocaleDateString("it-IT",{day:"numeric",month:"short"});
+  const y = mon.getFullYear()!==sun.getFullYear() ? ` ${sun.getFullYear()}` : ` ${mon.getFullYear()}`;
+  return `${fmt(mon)} – ${fmt(sun)}${y}`;
+}
+const H = 46;
+let renderQueued=false, pendingRender=null;
+function timeKey(t){ return t.replace(":","_"); }
+function sortByStart(a,b){ return a[1].start.localeCompare(b[1].start); }
+function toMin(t){ const [h,m]=t.split(":").map(Number); return h*60+m; }
+function fmtHour(h){ return String(h).padStart(2,"0")+":00"; }
+function esc(s){ const d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+const calHeaderEl = document.getElementById("calHeader");
+const timeGutterEl = document.getElementById("timeGutter");
+const calBodyEl = document.getElementById("calBody");
+const calScrollEl = document.getElementById("calScroll");
+function renderWeek(data, monday){
+  if(renderQueued){ pendingRender=[data,monday]; return; }
+  renderQueued=true;
+  requestAnimationFrame(()=>{
+    renderQueued=false;
+    if(pendingRender){ const p=pendingRender; pendingRender=null; renderWeek(p[0],p[1]); return; }
+    const todayStr = new Date().toDateString();
+    const hFrag=document.createDocumentFragment();
+    const corner=document.createElement("div"); corner.className="cal-header-corner"; hFrag.appendChild(corner);
+    for(let i=0;i<7;i++){
+      const dk=dayOrder[i];
+      const date=new Date(monday); date.setDate(monday.getDate()+i);
+      const isToday=date.toDateString()===todayStr;
+      const hd=document.createElement("div"); hd.className="cal-header-day"+(isToday?" today":"");
+      hd.dataset.day=dk;
+      hd.innerHTML=`<div class="day-name">${dayNames[dk]}</div><div class="day-date ${isToday?'today':''}">${date.getDate()}</div><div class="day-meta">${date.toLocaleDateString("it-IT",{month:"short"})}</div><button class="day-add" aria-label="Aggiungi">+</button>`;
+      hFrag.appendChild(hd);
     }
-
-    function saveEventToFirebase(day, start, end, title, type) {
-      if (!daysRef) return;
-      const hourKey = sanitizeTimeKey(start);
-      daysRef.child(`${day}/${hourKey}`).set({
-        title: title,
-        start: start,
-        end: end,
-        type: type
-      }).catch(err => {
-        alert("Errore salvataggio: " + err.message);
-      });
+    calHeaderEl.replaceChildren(hFrag);
+    if(!timeGutterEl.dataset.built){
+      const gFrag=document.createDocumentFragment();
+      for(let h=0;h<24;h++){ const lbl=document.createElement("div"); lbl.className="time-label"; lbl.style.top=(h*H)+"px"; lbl.textContent=fmtHour(h); gFrag.appendChild(lbl); }
+      timeGutterEl.appendChild(gFrag); timeGutterEl.style.height=(24*H)+"px"; timeGutterEl.dataset.built="1";
     }
-
-    function quickAdd(title, start, end, type) {
-      const day = parseInt(document.getElementById("customDay").value);
-      saveEventToFirebase(day, start, end, title, type);
-    }
-
-    function addCustomEvent() {
-      const day = parseInt(document.getElementById("customDay").value);
-      const title = document.getElementById("customTitle").value;
-      const start = document.getElementById("customStart").value;
-      const end = document.getElementById("customEnd").value;
-      const type = document.getElementById("customType").value;
-
-      if (!title || !start || !end) {
-        alert("Riempi tutti i campi dell'attività!");
-        return;
-      }
-
-      saveEventToFirebase(day, start, end, title, type);
-      document.getElementById("customTitle").value = "";
-    }
-
-    function editEvent(day, hourKey, e) {
-      if (e) e.stopPropagation();
-      if (!daysRef || !localDaysData[day]) return;
-      
-      const ev = localDaysData[day][hourKey];
-      if (!ev) return;
-
-      const newTitle = prompt("Modifica Nome Attività:", ev.title);
-      if (newTitle === null) return;
-
-      const newStart = prompt("Modifica Ora Inizio (HH:MM):", ev.start);
-      if (newStart === null) return;
-
-      const newEnd = prompt("Modifica Ora Fine (HH:MM):", ev.end);
-      if (newEnd === null) return;
-
-      const updatedTitle = newTitle.trim() || ev.title;
-      const updatedStart = newStart.trim() || ev.start;
-      const updatedEnd = newEnd.trim() || ev.end;
-
-      const newHourKey = sanitizeTimeKey(updatedStart);
-      
-      if (newHourKey !== hourKey) {
-        daysRef.child(`${day}/${hourKey}`).remove().then(() => {
-          return daysRef.child(`${day}/${newHourKey}`).set({
-            title: updatedTitle,
-            start: updatedStart,
-            end: updatedEnd,
-            type: ev.type
-          });
-        }).catch(err => {
-          alert("Errore modifica: " + err.message);
-        });
+    const gridFrag=document.createDocumentFragment();
+    for(let i=0;i<7;i++){
+      const dk=dayOrder[i];
+      const date=new Date(monday); date.setDate(monday.getDate()+i);
+      const isToday=date.toDateString()===todayStr;
+      const col=document.createElement("div"); col.className="day-col"+(isToday?" today-col":"");
+      const tl=document.createElement("div"); tl.className="timeline"; tl.dataset.day=dk;
+      const clickLayer=document.createElement("div"); clickLayer.className="timeline-click";
+      tl.appendChild(clickLayer);
+      const evs=data && data[dk] ? Object.entries(data[dk]) : null;
+      if(evs && evs.length){
+        evs.sort(sortByStart);
+        for(let j=0;j<evs.length;j++){
+          const k=evs[j][0], ev=evs[j][1];
+          let s=toMin(ev.start), e=toMin(ev.end); if(e===0) e=1440; if(e<=s) e=s+30;
+          const top=s/60*H+1, hh=(e-s)/60*H-2, ch=Math.max(18,hh);
+          const div=document.createElement("div"); div.className=`event ${typeClass[ev.type]||"e-routine"}${hh<36?" compact":""}`;
+          div.style.top=top+"px"; div.style.height=ch+"px"; div.dataset.key=k; div.dataset.day=dk;
+          div.innerHTML=`<div class="event-time">${ev.start}–${ev.end}</div><div class="event-title">${esc(ev.title)}</div>${hh>28?`<div class="event-type">${ev.type}</div>`:""}`;
+          tl.appendChild(div);
+        }
       } else {
-        daysRef.child(`${day}/${hourKey}`).update({
-          title: updatedTitle,
-          start: updatedStart,
-          end: updatedEnd
-        }).catch(err => {
-          alert("Errore modifica: " + err.message);
-        });
+        const emp=document.createElement("div"); emp.className="empty-timeline"; emp.textContent="— vuoto —"; tl.appendChild(emp);
       }
+      col.appendChild(tl); gridFrag.appendChild(col);
     }
+    weekGrid.replaceChildren(gridFrag);
+    calBodyEl.style.height=(24*H)+"px";
+  });
+}
+calHeaderEl.addEventListener("click", e=>{
+  const btn=e.target.closest(".day-add"); if(btn){ e.stopPropagation(); const hd=btn.closest(".cal-header-day"); openModal(null, hd.dataset.day); return; }
+  const hd=e.target.closest(".cal-header-day"); if(hd) openModal(null, hd.dataset.day);
+});
+weekGrid.addEventListener("click", e=>{
+  const evEl=e.target.closest(".event"); if(evEl){ const dk=evEl.dataset.day, k=evEl.dataset.key; const ev=currentData && currentData[dk] && currentData[dk][k]; if(ev) openModal({day:dk,key:k,ev}); return; }
+  const tl=e.target.closest(".timeline"); if(tl && e.target.classList.contains("timeline-click")){
+    const dk=tl.dataset.day; const rect=tl.getBoundingClientRect(); let mins=Math.floor((e.clientY-rect.top)/H*60);
+    mins=Math.max(0,Math.min(1410,Math.round(mins/15)*15)); const hh=String(Math.floor(mins/60)).padStart(2,"0"), mm=String(mins%60).padStart(2,"0");
+    const endM=Math.min(1440,mins+60), eh=String(Math.floor(endM/60)%24).padStart(2,"0"), em=String(endM%60).padStart(2,"0");
+    openModal(null, dk); requestAnimationFrame(()=>{ mStart.value=hh+":"+mm; mEnd.value=eh+":"+em; });
+  }
+});
 
-    function removeEvent(day, hourKey, e) {
-      if (e) e.stopPropagation();
-      if (!daysRef) return;
-      daysRef.child(`${day}/${hourKey}`).remove().catch(err => {
-        alert("Errore cancellazione: " + err.message);
-      });
-    }
+function openModal(existing, presetDay){
+  hideError(modalError);
+  if(existing){
+    editing = existing;
+    modalTitle.textContent="Modifica evento";
+    mDay.value=existing.day; mStart.value=existing.ev.start; mEnd.value=existing.ev.end; mTitle.value=existing.ev.title; mType.value=existing.ev.type;
+    btnDelete.style.display="block";
+  } else {
+    editing=null;
+    modalTitle.textContent="Nuovo evento";
+    mDay.value=presetDay||"1"; mStart.value="09:00"; mEnd.value="10:00"; mTitle.value=""; mType.value="routine";
+    btnDelete.style.display="none";
+  }
+  overlay.classList.add("open");
+  setTimeout(()=>mTitle.focus(),80);
+}
+function closeModal(){ overlay.classList.remove("open"); editing=null; hideError(modalError); }
 
-    function highlightToday() {
-      const now = new Date();
-      const currentDayIndex = now.getDay(); 
-
-      const dayNames = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
-      document.getElementById("currentDayBadge").innerText = `Oggi è ${dayNames[currentDayIndex]}`;
-
-      document.querySelectorAll("[data-day]").forEach(el => {
-        if (parseInt(el.dataset.day) === currentDayIndex) {
-          el.classList.add("today-col");
-        } else {
-          el.classList.remove("today-col");
-        }
-      });
-    }
-
-    function updateTimeProgress() {
-      const now = new Date();
-      let currentDayIndex = now.getDay(); 
-      let h = now.getHours();
-      const m = now.getMinutes();
-
-      if (h < START_HOUR && h <= 1) h += 24;
-
-      const currentMinutes = (h - START_HOUR) * 60 + m;
-      const topPx = (currentMinutes / 60) * ROW_HEIGHT;
-
-      let line = document.getElementById("timeProgressLine");
-      const todayCol = document.querySelector(`.day-column[data-day="${currentDayIndex}"]`);
-
-      if (todayCol && h >= START_HOUR && h < END_HOUR) {
-        if (!line) {
-          line = document.createElement("div");
-          line.id = "timeProgressLine";
-          line.className = "time-progress-line";
-        }
-        line.style.top = `${topPx}px`;
-        todayCol.appendChild(line);
-      } else if (line) {
-        line.remove();
+async function saveEvent(){
+  const day=mDay.value, start=mStart.value, end=mEnd.value, title=mTitle.value.trim(), type=mType.value;
+  if(!start||!end||!title) return showError(modalError,"Compila tutti i campi.");
+  if(start===end) return showError(modalError,"Ora inizio e fine non possono coincidere.");
+  if(!currentUser || !currentWeekId) return showError(modalError,"Utente non autenticato.");
+  const newKey=timeKey(start);
+  const payload={title,start,end,type};
+  try{
+    if(editing){
+      const oldKey=editing.key, oldDay=editing.day;
+      if(oldDay!==day || oldKey!==newKey){
+        await remove(ref(db,`users/${currentUser.uid}/weeks/${currentWeekId}/${oldDay}/${oldKey}`));
       }
+      await set(ref(db,`users/${currentUser.uid}/weeks/${currentWeekId}/${day}/${newKey}`), payload);
+      toast("Evento aggiornato ✓");
+    } else {
+      const snap = await get(ref(db,`users/${currentUser.uid}/weeks/${currentWeekId}/${day}/${newKey}`));
+      if(snap.exists()) return showError(modalError,"Esiste già un evento con quell'ora di inizio. Scegli un orario diverso.");
+      await set(ref(db,`users/${currentUser.uid}/weeks/${currentWeekId}/${day}/${newKey}`), payload);
+      toast("Evento creato ✓");
     }
+    closeModal();
+  }catch(e){ showError(modalError, e.message); }
+}
+async function deleteEvent(){
+  if(!editing) return;
+  if(!confirm("Eliminare questo evento?")) return;
+  try{
+    await remove(ref(db,`users/${currentUser.uid}/weeks/${currentWeekId}/${editing.day}/${editing.key}`));
+    toast("Evento eliminato");
+    closeModal();
+  }catch(e){ showError(modalError,e.message); }
+}
 
-    updateClock();
-  </script>
+function attachWeekListener(uid, weekId, monday){
+  if(weekRef) off(weekRef);
+  currentWeekId = weekId;
+  weekLabel.textContent = formatWeekLabel(monday);
+  document.getElementById("calHeader").innerHTML=`<div class="loading" style="grid-column:1/-1">Caricamento…</div>`;
+  document.getElementById("timeGutter").innerHTML=""; weekGrid.innerHTML="";
+  const r = ref(db,`users/${uid}/weeks/${weekId}`);
+  weekRef = r;
+  onValue(r, async (snap)=>{
+    if(!snap.exists()){
+      try{ await set(r, defaultStructure); toast("Routine predefinita caricata per questa settimana"); return; }catch(e){ document.getElementById("calHeader").innerHTML=`<div class="loading" style="grid-column:1/-1">Errore: ${esc(e.message)}</div>`; return; }
+    }
+    currentData = snap.val();
+    renderWeek(currentData, monday);
+    requestAnimationFrame(()=>{ const sc=document.getElementById("calScroll"); if(sc && weekOffset===0) sc.scrollTop=8*H; });
+  }, (err)=>{
+    document.getElementById("calHeader").innerHTML=`<div class="loading" style="grid-column:1/-1">Errore lettura: ${esc(err.message)}</div>`;
+  });
+}
+function loadCurrentWeek(){
+  if(!currentUser || !isConfigured) return;
+  const mon=getMonday(weekOffset);
+  const wid=weekIdFromMonday(mon);
+  attachWeekListener(currentUser.uid, wid, mon);
+}
+
+$("btnPrev").onclick=()=>{ weekOffset--; loadCurrentWeek(); };
+$("btnNext").onclick=()=>{ weekOffset++; loadCurrentWeek(); };
+$("btnToday").onclick=()=>{ weekOffset=0; loadCurrentWeek(); };
+$("btnAddGlobal").onclick=()=> openModal(null,"1");
+$("btnCancel").onclick=closeModal;
+$("btnSave").onclick=saveEvent;
+$("btnDelete").onclick=deleteEvent;
+overlay.addEventListener("click", e=>{ if(e.target===overlay) closeModal(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+$("btnReset").onclick=async()=>{
+  if(!currentUser||!currentWeekId) return;
+  if(!confirm("Ripristinare la routine predefinita? Tutti gli eventi di questa settimana verranno sovrascritti.")) return;
+  try{ await set(ref(db,`users/${currentUser.uid}/weeks/${currentWeekId}`), defaultStructure); toast("Routine ripristinata ✓"); }catch(e){ toast("Errore: "+e.message); }
+};
+$("btnLogout").onclick=()=> signOut(auth);
+
+const loginForm=$("loginForm"), btnLogin=$("btnLogin"), btnGoRegister=$("btnGoRegister");
+const authError=$("authError"), authSuccess=$("authSuccess");
+
+btnGoRegister.onclick=async()=>{
+  if(!isConfigured) return toast("Configura firebaseConfig prima di registrarti");
+  if(!isRegisterMode){
+    isRegisterMode=true; btnGoRegister.textContent="Hai già un account? Accedi"; btnLogin.innerHTML='<span class="material-symbols-rounded" style="font-size:18px">person_add</span> Registrati'; hideError(authError);
+    return;
+  } else {
+    isRegisterMode=false; btnGoRegister.textContent="Registrati"; btnLogin.innerHTML='<span class="material-symbols-rounded" style="font-size:18px">login</span> Accedi';
+  }
+};
+
+loginForm.onsubmit=async(e)=>{
+  e.preventDefault();
+  if(!isConfigured) return showError(authError,"Configura firebaseConfig con i dati del tuo progetto Firebase.");
+  const email=$("email").value.trim(), password=$("password").value;
+  hideError(authError); $("authSuccess").classList.remove("show");
+  btnLogin.disabled=true;
+  try{
+    if(isRegisterMode){
+      await createUserWithEmailAndPassword(auth,email,password);
+      showError(authSuccess,"Account creato! Accesso in corso…"); authSuccess.classList.add("show"); authError.classList.remove("show");
+    } else {
+      await signInWithEmailAndPassword(auth,email,password);
+    }
+  }catch(err){
+    showError(authError, fbError(err.code));
+  }finally{ btnLogin.disabled=false; }
+};
+
+if(isConfigured){
+  onAuthStateChanged(auth, (user)=>{
+    currentUser=user;
+    if(user){
+      authView.style.display="none"; appView.classList.add("visible"); $("userEmail").textContent=user.email; weekOffset=0; loadCurrentWeek();
+    } else {
+      if(weekRef) off(weekRef); weekRef=null;
+      appView.classList.remove("visible"); authView.style.display="flex";
+    }
+  });
+} else {
+  hideError(authError);
+}
+window.addEventListener("error", e=>{ if(String(e.message).includes("firebase")) toast("Errore Firebase: verifica la configurazione"); });
+</script>
 </body>
 </html>
